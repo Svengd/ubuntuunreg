@@ -1,5 +1,6 @@
 ###
 # Copyright (c) 2014, Nicolas Coevoet
+# Copyright (c) 2017, Unit 193
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,7 +74,7 @@ class UbuntuUnreg(callbacks.Plugin):
                 if mode == '+i' and '#ubuntu-unregged' in irc.state.channels:
                     l = []
                     for user in irc.state.channels['#ubuntu-unregged'].users:
-                        if not user in irc.state.channels['#ubuntu-unregged'].ops:
+                        if not user in irc.state.channels['#ubuntu-unregged'].ops and not user in irc.state.channels['#ubuntu-unregged'].voices:
                             l.append(user)
                     for user in l:
                         irc.queueMsg(ircmsgs.kick('#ubuntu-unregged',user,self.registryValue('kickMessage')))
