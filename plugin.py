@@ -76,8 +76,13 @@ class UbuntuUnreg(callbacks.Plugin):
                     for user in irc.state.channels['#ubuntu-unregged'].users:
                         if not user in irc.state.channels['#ubuntu-unregged'].ops and not user in irc.state.channels['#ubuntu-unregged'].voices:
                             l.append(user)
-                    for user in l:
-                        irc.queueMsg(ircmsgs.kick('#ubuntu-unregged',user,self.registryValue('kickMessage')))
-                    irc.queueMsg(ircmsgs.mode('#ubuntu-unregged', '-i'))
+                    if 'r' in irc.state.channels['#ubuntu-unregged'].modes:
+                        for user in l:
+                            irc.queueMsg(ircmsgs.IrcMsg('REMOVE #ubuntu-unregged %s :%s' % (user,self.registryValue('kickMessage'))))
+                        irc.queueMsg(ircmsgs.mode('#ubuntu-unregged', '-ir'))
+                    else:
+                        for user in l:
+                            irc.queueMsg(ircmsgs.kick('#ubuntu-unregged',user,self.registryValue('kickMessage')))
+                        irc.queueMsg(ircmsgs.mode('#ubuntu-unregged', '-i'))
 
 Class = UbuntuUnreg
