@@ -1,3 +1,4 @@
+# -*- Encoding: utf-8 -*-
 ###
 # Copyright (c) 2014, Nicolas Coevoet
 # All rights reserved.
@@ -53,7 +54,10 @@ conf.registerGlobalValue(UbuntuUnreg, 'interval',
     registry.NonNegativeInteger(300, """Interval in seconds between checks/messages"""))
 
 conf.registerGlobalValue(UbuntuUnreg, 'message',
-    registry.String("Please register an account /msg nickserv help register", """Message the bot will send to unreg"""))
+    registry.String("Please register an account by «/msg NickServ help register», "
+        + "then try joining #ubuntu again with «/join #ubuntu»",
+        """Message the bot will send to unreg"""))
 
 conf.registerGlobalValue(UbuntuUnreg, 'kickMessage',
-    registry.String("#ubuntu is +r, please identify to services", """Message the bot will send to unreg"""))
+    registry.String("Please try joining #ubuntu now with «/join #ubuntu»",
+        """Message the bot will use on kick"""))
