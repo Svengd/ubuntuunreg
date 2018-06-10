@@ -49,11 +49,11 @@ def configure(advanced):
 
 UbuntuUnreg = conf.registerPlugin('UbuntuUnreg')
 
+conf.registerGlobalValue(UbuntuUnreg, 'interval',
+    registry.NonNegativeInteger(300, """Interval in seconds between checks/messages"""))
+
 conf.registerGlobalValue(UbuntuUnreg, 'message',
     registry.String("Please register an account /msg nickserv help register", """Message the bot will send to unreg"""))
-
-conf.registerGlobalValue(UbuntuUnreg, 'interval',
-    registry.NonNegativeInteger(1, """interval between two message / check"""))
 
 conf.registerGlobalValue(UbuntuUnreg, 'kickMessage',
     registry.String("#ubuntu is +r, please identify to services", """Message the bot will send to unreg"""))

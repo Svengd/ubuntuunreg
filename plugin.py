@@ -29,12 +29,8 @@
 
 ###
 
-import supybot.utils as utils
-from supybot.commands import *
-import supybot.plugins as plugins
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
-import time
 import supybot.schedule as schedule
 import supybot.world as world
 import supybot.ircmsgs as ircmsgs
@@ -48,13 +44,17 @@ except ImportError:
     _ = lambda x:x
 
 class UbuntuUnreg(callbacks.Plugin):
-    """send message to #ubuntu-unregged at interval if #ubuntu is +r, do not reload this plugin."""
+    """Send message to #ubuntu-unregged at interval if #ubuntu is +r."""
     threaded = True
 
     def __init__(self, irc):
         self.__parent = super(UbuntuUnreg, self)
         self.__parent.__init__(irc)
-        schedule.addEvent(self.check,time.time()+self.registryValue('interval'))
+        self.event = 'UbuntuUnreg'
+        schedule.addPeriodicEvent(self.check, self.registryValue('interval'), self.event)
+
+    def die(self):
+        schedule.removePeriodicEvent(self.event)
 
     def check(self):
         if world:
@@ -63,7 +63,6 @@ class UbuntuUnreg(callbacks.Plugin):
                     if '#ubuntu' in irc.state.channels and '#ubuntu-unregged' in irc.state.channels:
                         if 'r' in irc.state.channels['#ubuntu'].modes:
                             irc.queueMsg(ircmsgs.privmsg('#ubuntu-unregged',self.registryValue('message')))
-        schedule.addEvent(self.check,time.time()+self.registryValue('interval'))
 
     def doMode(self,irc,msg):
         channel = msg.args[0]
