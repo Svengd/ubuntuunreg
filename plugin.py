@@ -26,14 +26,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
 ###
 
+import supybot.world as world
+import supybot.ircmsgs as ircmsgs
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 import supybot.schedule as schedule
-import supybot.world as world
-import supybot.ircmsgs as ircmsgs
 
 try:
     from supybot.i18n import PluginInternationalization
@@ -57,31 +56,28 @@ class UbuntuUnreg(callbacks.Plugin):
         schedule.removePeriodicEvent(self.event)
 
     def check(self):
-        if world:
-            if world.ircs:
-                for irc in world.ircs:
-                    if '#ubuntu' in irc.state.channels and '#ubuntu-unregged' in irc.state.channels:
-                        if 'r' in irc.state.channels['#ubuntu'].modes:
-                            irc.queueMsg(ircmsgs.privmsg('#ubuntu-unregged',self.registryValue('message')))
+        for irc in world.ircs:
+            if '#ubuntu' in irc.state.channels and '#ubuntu-unregged' in irc.state.channels:
+                if 'r' in irc.state.channels['#ubuntu'].modes:
+                    irc.queueMsg(ircmsgs.privmsg('#ubuntu-unregged', self.registryValue('message')))
 
-    def doMode(self,irc,msg):
+    def doMode(self, irc, msg):
         channel = msg.args[0]
-        if irc.isChannel(channel) and msg.args[1:] and channel in irc.state.channels and channel == '#ubuntu-unregged':
+        if channel == '#ubuntu-unregged' and channel in irc.state.channels:
             modes = ircutils.separateModes(msg.args[1:])
-            for change in modes:
-                (mode,value) = change
-                if mode == '+i' and '#ubuntu-unregged' in irc.state.channels:
-                    l = []
-                    for user in irc.state.channels['#ubuntu-unregged'].users:
-                        if not user in irc.state.channels['#ubuntu-unregged'].ops and not user in irc.state.channels['#ubuntu-unregged'].voices:
-                            l.append(user)
-                    if 'r' in irc.state.channels['#ubuntu-unregged'].modes:
-                        for user in l:
-                            irc.queueMsg(ircmsgs.IrcMsg('REMOVE #ubuntu-unregged %s :%s' % (user,self.registryValue('kickMessage'))))
-                        irc.queueMsg(ircmsgs.mode('#ubuntu-unregged', '-ir'))
+            for (mode, value) in modes:
+                if mode == '+i':
+                    kicks = []
+                    for user in irc.state.channels[channel].users:
+                        if not (user in irc.state.channels[channel].ops or user in irc.state.channels[channel].voices):
+                            kicks.append(user)
+                    if 'r' in irc.state.channels[channel].modes:
+                        for user in kicks:
+                            irc.queueMsg(ircmsgs.IrcMsg('REMOVE #ubuntu-unregged %s :%s' % (user, self.registryValue('kickMessage'))))
+                        irc.queueMsg(ircmsgs.mode(channel, '-ir'))
                     else:
-                        for user in l:
-                            irc.queueMsg(ircmsgs.kick('#ubuntu-unregged',user,self.registryValue('kickMessage')))
-                        irc.queueMsg(ircmsgs.mode('#ubuntu-unregged', '-i'))
+                        for user in kicks:
+                            irc.queueMsg(ircmsgs.kick(channel, user, self.registryValue('kickMessage')))
+                        irc.queueMsg(ircmsgs.mode(channel, '-i'))
 
 Class = UbuntuUnreg
