@@ -56,14 +56,17 @@ class UbuntuUnreg(callbacks.Plugin):
         schedule.removePeriodicEvent(self.event)
 
     def check(self):
-        for irc in world.ircs:
-            if '#ubuntu' in irc.state.channels and '#ubuntu-unregged' in irc.state.channels:
-                if 'r' in irc.state.channels['#ubuntu'].modes:
-                    irc.queueMsg(ircmsgs.privmsg('#ubuntu-unregged', self.registryValue('message')))
+        for channel in self.registryValue('channels'):
+            unregchan = '%s-unregged' % channel
+            for irc in world.ircs:
+                if channel in irc.state.channels and unregchan in irc.state.channels:
+                    if 'r' in irc.state.channels[channel].modes:
+                        irc.queueMsg(ircmsgs.privmsg(unregchan, self.registryValue('message') % (channel, channel)))
 
     def doMode(self, irc, msg):
         channel = msg.args[0]
-        if channel == '#ubuntu-unregged' and channel in irc.state.channels:
+        mainchan = channel.replace('-unregged', '')
+        if (channel.endswith('-unregged') and mainchan in self.registryValue('channels')) and channel in irc.state.channels:
             modes = ircutils.separateModes(msg.args[1:])
             for (mode, value) in modes:
                 if mode == '+i':
@@ -73,11 +76,11 @@ class UbuntuUnreg(callbacks.Plugin):
                             kicks.append(user)
                     if 'r' in irc.state.channels[channel].modes:
                         for user in kicks:
-                            irc.queueMsg(ircmsgs.IrcMsg('REMOVE #ubuntu-unregged %s :%s' % (user, self.registryValue('kickMessage'))))
+                            irc.queueMsg(ircmsgs.IrcMsg('REMOVE %s %s :%s' % (channel, user, self.registryValue('kickMessage') % (mainchan, mainchan))))
                         irc.queueMsg(ircmsgs.mode(channel, '-ir'))
                     else:
                         for user in kicks:
-                            irc.queueMsg(ircmsgs.kick(channel, user, self.registryValue('kickMessage')))
+                            irc.queueMsg(ircmsgs.kick(channel, user, self.registryValue('kickMessage') % (mainchan, mainchan)))
                         irc.queueMsg(ircmsgs.mode(channel, '-i'))
 
 Class = UbuntuUnreg

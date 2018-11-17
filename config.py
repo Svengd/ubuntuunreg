@@ -50,14 +50,18 @@ def configure(advanced):
 
 UbuntuUnreg = conf.registerPlugin('UbuntuUnreg')
 
+conf.registerGlobalValue(UbuntuUnreg, 'channels',
+    registry.SpaceSeparatedListOfStrings(['#ubuntu', '#kubuntu', '#xubuntu'],
+        """Channels to check for +r"""))
+
 conf.registerGlobalValue(UbuntuUnreg, 'interval',
     registry.NonNegativeInteger(300, """Interval in seconds between checks/messages"""))
 
 conf.registerGlobalValue(UbuntuUnreg, 'message',
     registry.String("Please register an account by «/msg NickServ help register», "
-        + "then try joining #ubuntu again with «/join #ubuntu»",
+        + "then try joining %s again with «/join %s»",
         """Message the bot will send to unreg"""))
 
 conf.registerGlobalValue(UbuntuUnreg, 'kickMessage',
-    registry.String("Please try joining #ubuntu now with «/join #ubuntu»",
+    registry.String("Please try joining %s now with «/join %s»",
         """Message the bot will use on kick"""))
